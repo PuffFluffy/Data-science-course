@@ -1,0 +1,105 @@
+---
+title: "Ls1_2Datatypr"
+author: "ZYY"
+date: "2021年6月3日"
+output: html_document
+---
+
+#Data Types
+##R Objects
+
+> Five basic or “atomic” classes of objects:
+
+*  character
+*  numeric (real numbers)
+*  integer
+*  complex
+*  logical (True/False)
+
+The most basic object is a vector
+
+*  A vector can only contain objects of the same class
+*  The one exception is a **list**
+*  Empty vectors can be created with the **vector()** function.
+
+##Attributes
+
+* names, dimnames
+* dimensions (e.g. matrices, arrays)
+* class
+* length
+* other user-defined attributes/metadata
+Attributes of an object can be accessed using the **attributes()** function.
+
+###Numbers 
+
+* Generally treated as numeric objects (i.e. double precision real numbers)
+* If you explicitly want an integer, you need to specify the L suffix, i.e. 1L as 1(integer)
+* Inf:infinity
+* NaN: undefined value or missing value
+
+###Vectors
+
+The **c()** function can be used to create vectors of objects.
+```{R}
+x <- c(0.5, 0.6) ## numeric
+x <- c(TRUE, FALSE) ## logical
+x <- c(T, F) ## logical
+x <- c("a", "b", "c") ## character
+x <- 9:29 ## integer
+x <- c(1+0i, 2+4i) ## complex
+```
+
+Using the **vector()** function
+```{R}
+x <- vector("numeric", length = 10) 
+x
+```
+ 
+What if you create a vector and you mix two different types of objects?
+e.g.
+```{R} 
+ y <- c(1.7, "a") ## character
+ y <- c(TRUE, 2) ## numeric
+ y <- c("a", TRUE) ## character
+```
+R will coerce the vector to create the least common denominator vector.
+
+>Explicit Coercion
+
+Objects can be explicitly coerced from one class to another using the ** as.XXX ** functions, if available
+```{R}
+x <- 0:6
+class(x)
+as.numeric(x)
+as.logical(x)
+as.character(x)
+```
+Nonsensical coercion results in *NA*s.
+```{R}
+x <- c("a", "b", "c")
+as.numeric(x)
+as.logical(x)
+as.complex(x)
+```
+
+###List
+Lists are a special type of vector that can contain elements of **different** classes.
+```{R}
+#To create a list
+x <- list(1, "a", TRUE, 1 + 4i) 
+x
+```
+
+
+###Matrices
+
+Matrices are vectors with a **dimension** attribute.The dimension attribute is itself an integer vector of
+length 2 (nrow, ncol).e.g.
+```{R}
+m <- matrix(nrow = 2, ncol = 3)
+m
+dim(m)
+attributes(m)
+```
+
