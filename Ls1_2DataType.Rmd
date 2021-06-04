@@ -102,4 +102,24 @@ m
 dim(m)
 attributes(m)
 ```
+Matrices are constructed **column-wise**, so entries can be thought of starting in the “upper left” corner
+and running down the columns.
+```{R}
+m <- matrix(1:6, nrow = 2, ncol = 3) 
+m
+```
+When create the matrices from a vector:
+```{R}
+ m <- 1:10
+ m
+ dim(m) <- c(2, 5)
+ m
+```
+>Column/Row binding
 
+```{R}
+x <- 1:3
+y <- 10:12
+cbind(x, y)
+rbind(x, y)
+```

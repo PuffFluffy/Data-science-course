@@ -1,0 +1,230 @@
+---
+title: 'Lesson 1 - Part 3: Basic operation'
+author: "ZYY"
+date: "2021年6月4日"
+output: html_document
+---
+#Interfaces to the Outside World
+
+* **file**, opens a connection to a file.
+* **gzfile**, opens a connection to a **file compressed with gzip**
+* **url**, opens a connection to a webpage
+
+**file** has a few arguments:
+```{r}
+str(file)
+```
+* **description** is the name of the file.
+* **open** is a code indicating:
+  + **“r”** read only
+  + **“w”** writing (and initializing a new file)
+  + **“a”** appending
+  + **“rb”, “wb”, “ab”** reading, writing, or appending in binary mode (Windows)
+  
+e.g. con <- file("foo.txt", "r"), then **con** can be read the same as "foo.txt"
+
+#Reading Data
+
+## **read.table**, **read.csv**, for reading tabular data
+The most common functions for reading data. Reading data in columns and rows format and return data frames in R.
+* **file**, the name of a file, or a connection
+
+* **header**, logical indicating if the file has a header line.
+
+* **sep**, a string indicating how the columns are separated,like ",", or tab, or space.
+
+* **colClasses*""**, a character vector indicating the class of each column in the dataset, like the first column is logical and the next is integer. It is  not necessary.
+
+* **nrows**, the number of rows in the dataset. Not required.
+
+* **comment.char**, a character string indicating the comment character.The default symbol is "#".
+
+* **skip**, the number of lines to skip from the beginning.
+
+* **stringsAsFactors**, should character variables be coded as factors? The default is TRUE. 
+
+**read.csv** is identical to read.table except that **the default separator is a comma**.
+
+###When facing larger datasets:
+*  Make a rough calculation of the memory required to store your dataset. If the dataset is larger than the amount of RAM on your computer, you can probably stop right here.
+*  Set **comment.char = ""** if there are no commented lines in your file
+*  Use the **colClasses** argument. If all of the columns are **“numeric”**, for example, then you can just set **colClasses = "numeric"**.If not：
+
+initial <- read.table("datatable.txt", nrows = 100) #Read the first 100 rows
+classes <- sapply(initial, class)                   #use the class function to know the class of each column
+tabAll <- read.table("datatable.txt",               #Re-read with the colClasses 
+ colClasses = classes)
+
+* **nrows**can helps with memory usage.A mild overestimate is okay.
+
+>Calculating Memory Requirements Calculating Memory Requirements
+
+I have a data frame with 1,500,000 rows and 120 columns, all of which are numeric data. Roughly, how much memory is required to store this data frame?
+
+1,500,000 × 120 × 8 bytes/numeric
+
+= 1440000000 bytes
+
+= 1440000000/2^20^  bytes/MB
+
+= 1,373.29 MB
+
+= 1.34 GB
+
+Twice as much memory of dataset is needed when using **read.table**.
+
+##  **readLines**, for reading lines of a text file.
+It gives you text in as a character vector in R. It can be useful for reading in lines of webpages.
+```{r}
+## This might take time
+con <- url("http://www.jhsph.edu", "r")
+x <- readLines(con)
+head(x)
+```
+
+##  **source**, for reading in R code files (inverse of dump)
+
+##  **dget**, for reading in R code files (inverse of dput)
+
+##  **load**, for reading in saved workspaces
+
+##  **unserialize**, for reading single R objects in binary form
+
+#Writing Data
+There are analogous functions for writing data to files
+**write.table,writeLines,save,serialize**
+
+##Textal Format: **dump** and **dput**
+Unlike writing out a table or csv file, dump and dput preserve the **metadata** (sacrificing some readability), so that another user doesn’t have to specify it all over again.
+### **dput** for output - **dget** to read it back.
+```{r}
+y <- data.frame(a = 1, b = "a")
+dput(y)
+dput(y, file = "y.R")
+new.y <- dget("y.R")
+new.y
+```
+### **dump** for output - **source** for input
+**dump**-**source** can be used for multiple objects while **dput**-**dget** can only be used on a single object.
+```{r}
+x <- "foo"
+y <- data.frame(a = 1, b = "a")
+dump(c("x", "y"), file = "y1.R") 
+rm(x, y)    #remove x and y
+source("y1.R")
+y
+x
+```
+
+#Subsetting
+
+* **[** always returns an object of **the same class as the original**; can be used to select **more than one**
+element (there is one exception).
+* **[[** is used to extract elements of a **list** or a **data frame**; it can only be used to extract a **single**
+element and the class of the returned object will **not** necessarily be a list or data frame.
+* **$** is used to extract elements of a list or data frame by **name**; semantics are similar to that of [[.
+```{r}
+x <- c("a", "b", "c", "c", "d", "a")
+x[1]
+x[1:4]
+x[x > "a"]
+u <- x > "a"
+x[u]
+```
+
+##Subsetting Lists
+```{r}
+x <- list(foo = 1:4, bar = 0.6)
+x[1]        #for **[**, the return is also a list.
+x[[1]]      #When using **[[**, only the sequence is returned.
+x$bar       #only extract the elements with the name "bar", so the output is a number.
+x[["bar"]]  #The same as $.
+x["bar"]    #The output is a list.
+```
+
+When extracting multiple elements, **"["** is the only choice.
+```{r}
+x <- list(foo = 1:4, bar = 0.6, baz = "hello")
+x[c(1, 3)]
+```
+
+The **[[** operator can be used with **computed indices**; $ can only be used with **literal names**.
+```{r}
+ x <- list(foo = 1:4, bar = 0.6, baz = "hello")
+ name <- "foo"
+ x[[name]] ## computed index for ‘foo’
+ x$name ## element ‘name’ doesn’t exist!
+ x$foo
+```
+
+The **[[** can take an **integer sequence**.
+```{r}
+x <- list(a = list(10, 12, 14), b = c(3.14, 2.81))
+x[[c(1, 3)]]
+x[[1]][[3]]
+x[[c(2, 1)]]
+```
+
+##Subsetting a Matrix
+Matrices can be subsetted in the usual way with (i,j) type indices.Indices can also be missing.
+```{r}
+x <- matrix(1:6, 2, 3)
+x[1, 2]
+x[1, ]
+```
+By default, when a single element of a matrix is retrieved, it is returned as **a vector of length 1** rather
+than a 1 × 1 matrix. This behavior can be turned off by setting **drop = FALSE**. Similarly, subsetting a single column or a single row will give you a vector, not a matrix (by default).
+```{R}
+x <- matrix(1:6, 2, 3)
+x[1, 2]
+x[1, 2, drop = FALSE]
+x[1, ]
+x[1, , drop = FALSE]
+```
+
+##Subsetting with Partial Matching 
+Partial matching of names is allowed with **[[** and **$**.
+```{r}
+x <- list(aardvark = 1:5)
+x$a          #searching for the name with "a"
+x[["a"]]     #searching for the name "a"
+x[["a", exact = FALSE]] #seaching for the closest name  to "a" 
+```
+
+##Removing NA values
+Common case:
+```{r}
+x <- c(1, 2, NA, 4, NA, 5)
+bad <- is.na(x)
+x[!bad]
+```
+When nultiple objects
+```{r}
+x <- c(1, 2, NA, 4, NA, 5)
+y <- c("a", "b", NA, "d", NA, "f")
+good <- complete.cases(x, y)  #whether in both objects, the value is not missing
+good
+x[good]
+y[good]
+```
+
+#Vectorized Operation
+Many operations in R are **vectorized** making code more **efficient, concise, and easier to read**.
+```{r}
+x <- 1:4
+y <- 6:9
+x + y
+x > 2
+x >= 2
+y == 8
+x * y
+x / y
+```
+For **matrices**
+```{r}
+x <- matrix(1:4, 2, 2)
+y <- matrix(rep(10, 4), 2, 2)
+x * y ## element-wise multiplication
+x / y
+x %*% y ## true matrix multiplication
+```
