@@ -1,0 +1,102 @@
+---
+title: 'Lesson 2 - Part 2: Function'
+author: "ZYY"
+date: "2021年6月8日"
+output: html_document
+---
+
+#R Function
+
+Functions in R are **“first class objects”**, which means that they can be treated much like any other R object.
+* Functions can be passed as **arguments** to other functions
+* Functions can be **nested**, so that you can define a function inside of another function
+* The return value of a function is the **last expression** in the function body to be evaluated.
+
+f <- function(<arguments>) {
+ ## Do something interesting
+}
+
+
+Example 1:
+```{r}
+add2<-function(x,y){
+  x+y
+}
+add2(3,5)
+```
+
+Example 2:
+```{r}
+above10<-function(x){
+  use<- x>10
+  x[use]
+}
+above10(a<-1:20)
+```
+
+Functions have **named arguments** which potentially have **default values**.
+* The **formal arguments** are the arguments included in the function definition.
+* The **formals** function returns a list of all the formal arguments of a function.
+* Not every function call in R makes use of all the formal arguments.
+* Function arguments can be **missing** or might have default values.
+
+Example 3:
+```{r}
+above<-function(x,n=10){   #"n= 10"" is the default number.
+  use <- x>n
+  x[use]
+}
+above(1:20,4)
+above(1:20)
+formals(above)
+```
+
+Example 4:
+```{r}
+columnmean<- function (x,removeNA=TRUE){
+  nc<- ncol(x)
+  means<- numeric(nc)
+  for (i in 1:nc){
+    means[i]<-mean(x[,i],na.rm = removeNA)
+  }
+  means
+}
+columnmean(matrix(1:40,5,8))
+```
+
+R functions arguments can be matched **positionally** or by **name**.
+You can mix positional matching with matching by name. When an argument is matched by name, it is “taken out” of the argument list and the remaining unnamed arguments are matched in the order that they are listed in the function definition.
+
+Function arguments can also be **partially** matched: exact match for a named argument>partial match>positional match.
+
+>Lazy Evaluation
+
+Arguments to functions are evaluated lazily, so they are evaluated only as needed.
+
+```{r}
+f <- function(a, b) {
+ a^2
+}
+f(2)
+```
+This function never actually uses the argument b, so calling f(2) will not produce an error because the 2 gets positionally matched to a.
+
+##The “...” Argument
+The ... argument indicate a variable number of arguments that are usually **passed on to other functions**.
+* ... is often used when extending another function and you don’t want to copy the entire argument list of the original function.
+
+e.g.
+myplot <- function(x, y, type = "l", ...) {
+ plot(x, y, type = type, ...)
+}
+
+*The ... argument is also necessary when the number of arguments passed to the function cannot be known in advance.
+e.g. in paste(), the number of arguments can be flexible.
+
+* Any arguments that appear after ... on the argument list must be **named explicitly** and cannot be partially matched.
+```{r}
+paste("a", "b", sep = ":")
+paste("a", "b", se = ":")
+```
+
+

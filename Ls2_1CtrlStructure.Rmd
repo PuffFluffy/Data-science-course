@@ -1,0 +1,120 @@
+---
+title: "Lesson 2 - Part 1: Control Structure"
+author: "ZYY"
+date: "2021年6月8日"
+output: html_document
+---
+
+#Control Structures
+
+* Control structures like if, while, and for allow you to control the flow of an R program
+* Infinite loops should generally be avoided, even if they are theoretically correct.
+* Control structures mentiond here are primarily useful for writing programs; for command-line interactive work, the **apply** functions are more useful.
+
+##if, else: testing a condition
+
+if(<condition>) {
+ ## do something
+} else {
+ ## do something else
+}
+
+```{R}
+x<-5
+if(x > 3) {
+ y <- 10
+} else {
+ y <- 0
+}
+y
+
+#or you can do this
+y <- if(x > 3) {
+ 10
+} else {
+ 0
+}
+y
+```
+
+##for: execute a loop a fixed number of times
+
+for(i in 1:10) {
+ print(i)
+}
+
+```{r}
+x <- c("a", "b", "c", "d")
+#These 3 loops have the same behavior.
+for(i in 1:4) {
+ print(x[i])
+}
+for(i in seq_along(x)) {
+ print(x[i])
+}
+for(letter in x) {
+ print(letter)
+}
+for(i in 1:4) print(x[i])
+
+```
+
+for loops can be nested.Nesting beyond 2–3 levels is often very difficult to read/understand.
+```{r}
+x <- matrix(1:6, 2, 3)
+for(i in seq_len(nrow(x))) {
+ for(j in seq_len(ncol(x))) {
+ print(x[i, j])
+ }
+}
+```
+
+##while: execute a loop while a condition is true
+
+count <- 0
+while(count < 10) {
+ print(count)
+ count <- count + 1
+}
+```{r}
+z <- 5
+while(z >= 3 && z <= 10) {
+ print(z)
+ coin <- rbinom(1, 1, 0.5)
+ if(coin == 1) { ## random walk
+ z <- z + 1
+ } else {
+ z <- z - 1
+ }
+}
+```
+Conditions are always evaluated from **left to right**.
+
+##repeat: execute an infinite loop
+
+The only way to exit a repeat loop is to call **break**.
+e.g.
+x0 <- 1
+tol <- 1e-8
+repeat {
+ x1 <- computeEstimate()
+ if(abs(x1 - x0) < tol) {
+ break
+ } else {
+ x0 <- x1
+ }
+}
+
+##break: break the execution of a loop
+##next: skip an interation of a loop
+
+for(i in 1:100) {
+ if(i <= 20) {
+ ## Skip the first 20 iterations
+ next
+ }
+ ## Do something here
+}
+
+##return: exit a function
+
