@@ -1,0 +1,69 @@
+---
+title: "Lesson 2 - Part 3"
+author: "ZYY"
+date: "2021年6月9日"
+output: html_document
+---
+
+#Coding Standard
+
+##1. Always use text files / text editor
+
+##2. Indent your code
+
+* Indenting improves readability
+* Fixing line length (80 columns) prevents lots of nesting and very long functions
+* Suggested: Indents of 4 spaces at minimum; 8 spaces ideal
+
+##3. Limit the width of your code (80 columns?)
+ 
+##4. Limit the length of individual functions
+
+
+#Dates and Times
+
+R has developed a special representation of dates and times
+* Dates are represented by the **Date** class.
+* Dates are stored internally as the number of days since **1970-01-01**.
+* Dates can be coerced from a character string using the as.Date() function.
+```{r}
+x <- as.Date("1970-01-01")
+x
+unclass(x)
+unclass(as.Date("1970-01-02"))
+```
+
+* Times are represented by the **POSIXct** or the **POSIXlt** class.
+    - POSIXct is just a very large **integer** under the hood; it use a useful class when you want to store times in something like a **data frame**.
+    - POSIXlt is a **list** underneath and it stores a bunch of other useful information like the day of the week, day of the year, month, day of the month.
+* Times are stored internally as the number of seconds since **1970-01-01**
+```{r}
+x <- Sys.time()
+x ## Already in ‘POSIXct’ format
+unclass(x) #The number of secs
+p <- as.POSIXlt(x)
+names(unclass(p))
+p$sec
+```
+
+* There are a number of generic functions that work on dates and times
+    - **weekdays()**: give the day of the week
+    - **months()**: give the month name
+    - **quarters()**: give the quarter number (“Q1”, “Q2”, “Q3”, or “Q4”)
+    
+* **strptime()**:converts dates which are written in character string format into date or time objects.
+```{r}
+datestring <- c("January 10, 2012 10:40", "December 9, 2011 9:10")
+x <- strptime (datestring, "%B %d, %Y %H:%M") #There is something wrong.
+x
+class(x)
+```
+
+##Operations on Dates and Times Operations on Dates and Times
+```{r}
+x <- as.Date("2012-01-01")
+y <- strptime("9 Jan 2011 11:34:21", "%d %b %Y %H:%M:%S") #There is something wrong.
+x <- as.POSIXlt(x)
+x-y
+```
+
