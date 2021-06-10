@@ -1,0 +1,164 @@
+---
+title: "Lesson 3 - Part 1: Loop Function"
+author: "ZYY"
+date: "2021年6月10日"
+output: html_document
+---
+
+#lapply: Loop over a list and evaluate a function on each element
+
+**lapply** takes three arguments: 
+1. a list **X**; If X is not a list, it will be coerced to a list using **as.list.**
+2. a function (or the name of a function) **FUN**; 
+3. other arguments via its ... argument. 
+```{r}
+lapply
+```
+**lapply** always returns a list, regardless of the class of the input.
+```{r}
+x <- list(a = 1:5, b = rnorm(10))
+lapply(x, mean)
+
+x <- 1:4
+lapply(x, runif) #generate a set of uniform random variables.The first argument in runif is the amount of variables.
+lapply(x, runif, min = 0, max = 10) #min & max is arguments for runif. They are passed to lapply by "..." .
+```
+
+>Anonymous function
+
+Anonymous functions are functions that don't have names, so you don't assign them a name of some sort but you can kind of generate them on the fly. For example:
+```{r}
+x <- list(a = matrix(1:4, 2, 2), b = matrix(1:6, 3, 2))
+x
+lapply(x, function(elt) elt[,1])
+```
+***
+#sapply: Same as lapply but try to simplify the result
+sapply will try to simplify the result of lapply if possible.
+* If the result is a list where every element is length 1, then a **vector** is returned
+* If the result is a list where every element is a vector of the same length (> 1), a **matrix** is returned.
+* If it can’t figure things out, a **list** is returned.
+```{r}
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+lapply(x, mean)
+sapply(x, mean) 
+```
+***
+#apply: Apply a function over the margins of an array
+
+apply is used to a evaluate a function (often an anonymous one) over the margins of an array.
+* It is most often used to apply a function to the rows or columns of a matrix
+* It can be used with general arrays, e.g. taking the average of an array of matrices
+* It is not really faster than writing a loop, but it works in one line!
+```{r}
+str(apply)
+```
+* **X** is an array
+* **MARGIN** is an integer vector indicating which margins should be “retained”.
+* **FUN** is a function to be applied
+* **...** is for other arguments to be passed to FUN
+
+```{r}
+x <- matrix(rnorm(200), 20, 10)
+apply(x, 2, mean) #MARGIN：dimension to be preserved. Row:1st dimension ; Col: 2nd dimension
+apply(x, 1, sum)
+apply(x, 1, quantile, probs = c(0.25, 0.75))# The 25% and 75% value of each row; 
+                                            #probs argument is passed to quantile()
+a <- array(rnorm(2 * 2 * 10), c(2, 2, 10))  #a 2*2*10 matrix
+apply(a, c(1, 2), mean)                     #The average 2*2 matrix from 10 2*2 matrix
+rowMeans(a, dims = 2)
+```
+> shortcut functions
+
+* rowSums = apply(x, 1, sum)
+* rowMeans = apply(x, 1, mean)
+* colSums = apply(x, 2, sum)
+* colMeans = apply(x, 2, mean)
+
+***
+
+#mapply: Multivariate version of lapply
+mapply is a **multivariate apply** of sorts which applies a function in parallel over a set of arguments.
+```{r}
+ str(mapply)
+```
+* **FUN** is a function to apply.The number of arguments of **FUN** must greater(>=) than the argument in "...".
+* **...** contains arguments to apply over
+* **MoreArgs** is a list of other arguments to FUN.
+* **SIMPLIFY** indicates whether the result should be simplified.
+```{r}
+mapply(rep, 1:4, 4:1)#list(rep(1, 4), rep(2, 3), rep(3, 2), rep(4, 1))
+```
+>Vectorizing a Function
+
+```{r}
+noise <- function(n, mean, sd) {
+  rnorm(n, mean, sd)
+  }
+noise(5, 1, 2)      #5 variales with the mean 1 and standard variation 2.
+noise(1:5, 1:5, 2)  #Acutally an error.
+mapply(noise, 1:5, 1:5, 2)#list(noise(1, 1, 2), noise(2, 2, 2), noise(3, 3, 2), noise(4, 4, 2), noise(5, 5, 2))
+```
+
+***
+#tapply: Apply a function over subsets of a vector
+tapply is used to apply a function over subsets of a vector. 
+```{r}
+str(tapply)
+```
+* **X** is a vector
+* **INDEX** is a factor or a list of factors (or else they are coerced to factors)
+* **FUN** is a function to be applied
+* **...** contains other arguments to be passed FUN
+* **simplify**, should we simplify the result?
+```{r}
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+f <- gl(3, 10) #f : factor variable.
+f
+tapply(x, f, mean)
+tapply(x, f, mean, simplify = FALSE)  #The output when simplify = FALSE is a list.
+
+```
+***
+
+#split
+split takes a vector or other objects and splits it into groups determined by a factor or list of factors.
+```{r}
+str(split)
+```
+* **x** is a vector (or list) or data frame
+* **f** is a factor (or coerced to one) or a list of factors
+* **drop** indicates whether empty factors levels should be dropped.
+By combining with split(), **lapply** and **sapply** can split the matrix into several part like *tapply* does.
+```{r}
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+f <- gl(3, 10)
+split(x, f)
+lapply(split(x, f), mean)
+```
+
+>Splitting a Data Frame
+
+```{r}
+library(datasets)
+head(airquality)
+s <- split(airquality, airquality$Month)
+lapply(s, function(x) colMeans(x[, c("Ozone", "Solar.R", "Wind")]))
+sapply(s, function(x) colMeans(x[, c("Ozone", "Solar.R", "Wind")]))
+sapply(s, function(x) colMeans(x[, c("Ozone", "Solar.R", "Wind")],
+                               na.rm = TRUE))
+
+```
+
+>Splitting on More than One Level
+
+```{r}
+x <- rnorm(10)
+f1 <- gl(2, 5)
+f1
+f2 <- gl(5, 2)
+f2
+interaction(f1, f2)   #Combine the 2 factors
+str(split(x, list(f1, f2)))   # In split(), list(f1,f2) means interaction(f1, f2)
+ str(split(x, list(f1, f2), drop = TRUE))   #Empty levels can be dropped.
+```
